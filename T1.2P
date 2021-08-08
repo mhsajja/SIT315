@@ -1,0 +1,31 @@
+// C++ code
+//
+int sensorState = 0;
+
+void setup()
+{
+  pinMode(2, INPUT);
+  pinMode(13, OUTPUT);
+  Serial.begin(9600);
+  PCICR |= 0b00000100; 
+  
+  PCMSK2 |= 0b10000100;   
+}
+
+void loop()
+{
+  // read the state of the sensor/digital input
+  sensorState = digitalRead(2);
+  // Turn Led on if sensorState is High
+  if (sensorState == HIGH) {
+    digitalWrite(13, HIGH);
+    Serial.println("Congrats! The sensor is now activated");
+  } else {
+    digitalWrite(13, LOW);
+  }
+  delay(1000); // Delay a little bit to improve simulation performance
+}
+
+ISR(PCINT2_vect){
+	PIND & B00100000;
+}  
