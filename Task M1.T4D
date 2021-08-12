@@ -9,6 +9,7 @@ const uint16_t t1_comp = 31250;
 
 void setup()
 {
+noInterrupts();
   //Set CTC mode
   TCCR1B &= ~(1 << WGM13);
   TCCR1B |= (1 << WGM12);
@@ -38,7 +39,7 @@ void setup()
   PCICR |= 0b00100000; 
   
   PCMSK2 |= 0b10001100;
-  
+  interrupts();
 }
 
 void buttonFunc()
