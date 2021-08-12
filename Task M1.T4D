@@ -1,0 +1,95 @@
+// C++ code
+//
+int sensorState = 0;
+int sensorValue = 0;
+int buttonState = 0;
+
+const uint16_t t1_load = 0;
+const uint16_t t1_comp = 31250;
+
+void setup()
+{
+  //Set CTC mode
+  TCCR1B &= ~(1 << WGM13);
+  TCCR1B |= (1 << WGM12);
+  
+  //Set to prescaler of 256
+  TCCR1B |= (1 << CS12);
+  TCCR1B &= ~(1 << CS11);
+  TCCR1B &= ~(1 << CS10);
+  
+  //Reset Timer1 and set compare value
+  TCNT1 = t1_load;
+  OCR1A = t1_comp;
+  
+  //Enable Timer1 compare interrupt
+  TIMSK1 = (1 << OCIE1A);
+  
+  //Enable global interrupts
+  sei();
+  
+  pinMode(2, INPUT);
+  pinMode(3, INPUT);
+  pinMode(A0, INPUT);
+  pinMode(13, OUTPUT);
+  Serial.begin(9600);
+  PCICR |= 0b00001100; 
+  PCICR |= 0b00100000;
+  PCICR |= 0b00100000; 
+  
+  PCMSK2 |= 0b10001100;
+  
+}
+
+void buttonFunc()
+{
+  buttonState = digitalRead(3);
+  // check if pushbutton is pressed. if it is, the
+  // button state is HIGH
+  if (buttonState == HIGH) {
+    digitalWrite(13, HIGH);
+    Serial.println("Button Pressed");
+  } else {
+    digitalWrite(13, LOW);
+  }
+}
+void photoresistor()
+{
+  sensorValue = analogRead(A0);
+  Serial.println(sensorValue);
+  analogWrite(13, map(sensorValue, 0, 1023, 0, 255));
+}
+void pirsensor()
+{
+   sensorState = digitalRead(2);
+  if (sensorState == HIGH) {
+    digitalWrite(13, HIGH);
+    Serial.println("Congrats! The sensor is now activated");
+  } else {
+    digitalWrite(13, LOW);
+  }
+}
+void loop()
+{
+  
+  delay(1000); // Delay a little bit to improve simulation performance
+}
+
+void timer_trigger()
+{
+  pirsensor();
+  photoresistor();
+  buttonFunc();
+}
+
+
+
+ISR(PCINT2_vect){
+	PIND & B00100000;
+}  
+
+ISR(TIMER1_COMPA_vect)
+{
+  //call function 
+  timer_trigger();
+}
